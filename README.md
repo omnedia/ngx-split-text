@@ -55,6 +55,7 @@ Use the component in your template:
   [ease]="'elastic.out(1, 0.3)'"
   [from]="{ opacity: 0, y: 40 }"
   [to]="{ opacity: 1, y: 0 }"
+  [animateOnlyOnce]="false"
   styleClass="custom-split-text"
   (onLetterAnimationComplete)="handleComplete()"
 ></om-split-text>
@@ -72,6 +73,7 @@ Use the component in your template:
   [ease]="ease"
   [from]="fromOptions"
   [to]="toOptions"
+  [animateOnlyOnce]="animateOnlyOnce"
   styleClass="your-custom-class"
   (onLetterAnimationComplete)="yourHandler()"
 ></om-split-text>
@@ -84,6 +86,7 @@ Use the component in your template:
 * `ease`: GSAP ease string. Example: `'elastic.out(1, 0.3)'`, `'power3.out'`, etc. Default: `'elastic.out(1, 0.3)'`.
 * `from`: Initial animation state, e.g. `{ opacity: 0, y: 20 }`.
 * `to`: Final animation state, e.g. `{ opacity: 1, y: 0 }`.
+* `animateOnlyOnce`: Boolean flag if the animation should only play once or every time it gets into view, e.g. `true`.
 * `styleClass`: Optional CSS class for the container.
 * `onLetterAnimationComplete`: Event emitted when the last element finishes animating.
 
@@ -99,6 +102,7 @@ Use the component in your template:
   [ease]="'elastic.out(1, 0.3)'"
   [from]="{ opacity: 0, y: 60 }"
   [to]="{ opacity: 1, y: 0 }"
+  [animateOnlyOnce]="true"
   styleClass="split-text-demo"
   (onLetterAnimationComplete)="onAnimationDone()"
 ></om-split-text>
