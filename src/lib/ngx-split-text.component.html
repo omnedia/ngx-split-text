@@ -1,0 +1,13 @@
+<div class="om-split-text" [ngClass]="styleClass" #OmSplitText>
+  <p>
+    @for (item of splitItems(); track $index) {
+      <span
+        #OmSplitItem
+        class="om-split-item"
+        [ngStyle]="{
+        whiteSpace: getWhitespace(item)
+      }"
+      >{{ item }}</span>
+    }
+  </p>
+</div>
