@@ -61,7 +61,8 @@ export class NgxSplitTextComponent implements AfterViewInit, OnDestroy {
   isInView = signal(false);
   private intersectionObserver?: IntersectionObserver;
   private animatedOnce = false;
-  private justAnimated = false;
+  private animating = false;
+  private resetTimer: any;
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: object
@@ -70,6 +71,8 @@ export class NgxSplitTextComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     if (isPlatformBrowser(this.platformId)) {
+      const el = this.splitTextRef.nativeElement;
+
       this.intersectionObserver = new IntersectionObserver(([entry]) => {
         const wasInView = this.isInView();
         this.isInView.set(entry.isIntersecting);
@@ -78,12 +81,17 @@ export class NgxSplitTextComponent implements AfterViewInit, OnDestroy {
           this.animateIn();
         }
 
-        if (wasInView && !this.isInView() && !this.animateOnlyOnce) {
-          this.resetAnimation();
+        if (wasInView && !this.isInView() && !this.animateOnlyOnce && !this.animating) {
+          clearTimeout(this.resetTimer);
+          this.resetTimer = setTimeout(() => {
+            const r = el.getBoundingClientRect();
+            const actuallyOut = r.bottom <= 0 || r.top >= innerHeight || r.right <= 0 || r.left >= innerWidth;
+            if (actuallyOut) this.resetAnimation();
+          }, 250);
         }
       }, {threshold: 0, rootMargin: '0px 0px -5% 0px'});
 
-      this.intersectionObserver.observe(this.splitTextRef.nativeElement);
+      this.intersectionObserver.observe(el);
 
       this.itemsList.changes.subscribe(() => {
         if (this.isInView()) {
@@ -94,48 +102,44 @@ export class NgxSplitTextComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.intersectionObserver) {
-      this.intersectionObserver.disconnect();
-    }
+    this.intersectionObserver?.disconnect();
+    clearTimeout(this.resetTimer);
   }
 
   animateIn(): void {
     if (!this.itemsList || this.itemsList.length === 0) return;
 
     this.animatedOnce = true;
-    this.justAnimated = true;
-    setTimeout(() => this.justAnimated = false, 100);
+    this.animating = true;
+    this.intersectionObserver?.unobserve(this.splitTextRef.nativeElement);
 
-    this.itemsList.forEach((el, idx) => {
-      gsap.set(el.nativeElement, {
-        opacity: this.from.opacity,
-        y: this.from.y,
-      });
+    const els = this.itemsList.map(i => i.nativeElement);
+    gsap.killTweensOf(els);
+    gsap.set(els, {opacity: this.from.opacity, y: this.from.y, force3D: true});
 
-      gsap.to(el.nativeElement, {
-        opacity: this.to.opacity,
-        y: this.to.y,
-        duration: this.duration,
-        delay: (idx * this.delay) / 1000,
-        ease: this.ease,
-        onComplete: () => {
-          if (idx === this.itemsList.length - 1) {
-            this.onLetterAnimationComplete.emit();
-          }
-        },
-      });
+    gsap.to(els, {
+      opacity: this.to.opacity,
+      y: this.to.y,
+      duration: this.duration,
+      stagger: this.delay / 1000,
+      ease: this.ease,
+      overwrite: 'auto',
+      force3D: true,
+      onComplete: () => {
+        this.animating = false;
+        if (!this.animateOnlyOnce) {
+          this.intersectionObserver?.observe(this.splitTextRef.nativeElement);
+        }
+        this.onLetterAnimationComplete.emit();
+      }
     });
   }
 
   resetAnimation(): void {
-    if (this.justAnimated) return;
-    
-    this.itemsList.forEach((el) => {
-      gsap.set(el.nativeElement, {
-        opacity: this.from.opacity,
-        y: this.from.y,
-      });
-    });
+    if (this.animating) return;
+    const els = this.itemsList.toArray().map(i => i.nativeElement);
+    gsap.killTweensOf(els);
+    gsap.set(els, {opacity: this.from.opacity, y: this.from.y, force3D: true});
   }
 
   getWhitespace(item: string): string {
