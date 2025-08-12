@@ -61,6 +61,7 @@ export class NgxSplitTextComponent implements AfterViewInit, OnDestroy {
   isInView = signal(false);
   private intersectionObserver?: IntersectionObserver;
   private animatedOnce = false;
+  private justAnimated = false;
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: object
@@ -102,6 +103,8 @@ export class NgxSplitTextComponent implements AfterViewInit, OnDestroy {
     if (!this.itemsList || this.itemsList.length === 0) return;
 
     this.animatedOnce = true;
+    this.justAnimated = true;
+    setTimeout(() => this.justAnimated = false, 100);
 
     this.itemsList.forEach((el, idx) => {
       gsap.set(el.nativeElement, {
@@ -125,6 +128,8 @@ export class NgxSplitTextComponent implements AfterViewInit, OnDestroy {
   }
 
   resetAnimation(): void {
+    if (this.justAnimated) return;
+    
     this.itemsList.forEach((el) => {
       gsap.set(el.nativeElement, {
         opacity: this.from.opacity,
