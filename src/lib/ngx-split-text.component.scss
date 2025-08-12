@@ -3,5 +3,8 @@
 
   .om-split-item {
     display: inline-block;
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
   }
 }

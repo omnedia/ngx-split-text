@@ -80,9 +80,15 @@ export class NgxSplitTextComponent implements AfterViewInit, OnDestroy {
         if (wasInView && !this.isInView() && !this.animateOnlyOnce) {
           this.resetAnimation();
         }
-      });
+      }, {threshold: 0, rootMargin: '0px 0px -5% 0px'});
 
       this.intersectionObserver.observe(this.splitTextRef.nativeElement);
+
+      this.itemsList.changes.subscribe(() => {
+        if (this.isInView()) {
+          this.animateIn();
+        }
+      });
     }
   }
 
@@ -93,6 +99,8 @@ export class NgxSplitTextComponent implements AfterViewInit, OnDestroy {
   }
 
   animateIn(): void {
+    if (!this.itemsList || this.itemsList.length === 0) return;
+
     this.animatedOnce = true;
 
     this.itemsList.forEach((el, idx) => {

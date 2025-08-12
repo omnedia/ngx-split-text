@@ -1,6 +1,6 @@
 {
   "name": "@omnedia/ngx-split-text",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "peerDependencies": {
     "@angular/common": "^20.0.0",
     "@angular/core": "^20.0.0",
